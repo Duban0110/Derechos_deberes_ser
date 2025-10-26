@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienestar del Paciente - Clínica</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Botón modo médico -->
+        <button class="medical-mode-toggle" id="medicalModeToggle">
+            👨‍⚕️ Modo Médico
+        </button>
+
+        <!-- Modal de login médico -->
+        <div class="login-modal" id="loginModal">
+            <div class="login-content">
+                <div class="login-header">
+                    <h2>🔐 Acceso Médico</h2>
+                    <p>Ingresa tus credenciales para acceder al panel médico</p>
+                </div>
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="username">Usuario</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="login-error" id="loginError" style="display: none;">
+                        Usuario o contraseña incorrectos
+                    </div>
+                    <div class="button-group-center">
+                        <button type="submit" class="btn btn-primary">🔓 Iniciar Sesión</button>
+                        <button type="button" class="btn btn-secondary" id="cancelLogin">❌ Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Vista médico -->
+        <div class="medical-view" id="medicalView">
+            <div class="medical-header">
+                <h2>👨‍⚕️ Panel Médico - Registro de Pacientes</h2>
+                <div class="medical-controls">
+                    <div class="session-status" id="sessionStatus">
+                        <div class="session-indicator">
+                            <span class="session-icon">🟢</span>
+                            <span class="session-timer" id="sessionTimer">30:00</span>
+                        </div>
+                        <span class="session-label">Sesión activa</span>
+                    </div>
+                    <button type="button" class="btn btn-warning" id="logoutBtn">
+                        🚪 Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Advertencia de sesión -->
+            <div class="session-warning" id="sessionWarning" style="display: none;">
+                <div class="warning-content">
+                    <span class="warning-icon">⚠️</span>
+                    <span class="warning-text">Tu sesión expirará pronto. Realiza alguna actividad para extenderla.</span>
+                </div>
+            </div>
+            
+            <div class="patients-stats" id="patientsStats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPatients">0</div>
+                    <div class="stat-label">Total Pacientes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completedSurveys">0</div>
+                    <div class="stat-label">Encuestas Completadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="positivePatients">0</div>
+                    <div class="stat-label">Estado Positivo</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="needAttentionPatients">0</div>
+                    <div class="stat-label">Requieren Atención</div>
+                </div>
+            </div>
+
+            <div class="filter-controls">
+                <input type="text" id="searchPatient" placeholder="🔍 Buscar por nombre o documento...">
+                <select id="filterMood">
+                    <option value="">Todos los estados de ánimo</option>
+                    <option value="muy-feliz">Muy Feliz</option>
+                    <option value="feliz">Feliz</option>
+                    <option value="neutral">Neutral</option>
+                    <option value="preocupado">Preocupado</option>
+                    <option value="triste">Triste</option>
+                </select>
+                <select id="filterService">
+                    <option value="">Todos los servicios</option>
+                </select>
+            </div>
+
+            <div class="patients-table-container">
+                <table class="patients-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Paciente</th>
+                            <th>Documento</th>
+                            <th>Habitación</th>
+                            <th>Servicio</th>
+                            <th>Estado de Ánimo</th>
+                            <th>Derechos/Deberes</th>
+                            <th>Fecha/Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsTableBody">
+                        <!-- Contenido dinámico -->
+                    </tbody>
+                </table>
+                <div class="no-patients-message" id="noPatientsMessage">
+                    📋 No hay pacientes registrados aún.<br>
+                    <small>Los pacientes aparecerán aquí cuando completen su registro.</small>
+                </div>
+            </div>
+
+            <div class="button-group-center">
+                <button type="button" class="btn btn-secondary" id="backToPatientMode">
+                    👤 Volver al Modo Paciente
+                </button>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="header" id="patientHeader">
+            <h1>🏥 Bienestar del Paciente</h1>
+            <p>Tu acompañamiento durante la hospitalización</p>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="progress-bar" id="progressBar">
+            <a href="#registro" class="progress-step active" data-step="1">
+                <div class="step-number">1</div>
+                <span>Registro</span>
+            </a>
+            <a href="#derechos" class="progress-step" data-step="2">
+                <div class="step-number">2</div>
+                <span>Derechos y Deberes</span>
+            </a>
+            <a href="#rutinas" class="progress-step" data-step="3">
+                <div class="step-number">3</div>
+                <span>Rutinas</span>
+            </a>
+            <a href="#estado" class="progress-step" data-step="4">
+                <div class="step-number">4</div>
+                <span>Estado</span>
+            </a>
+        </div>
+
+        <!-- Sección 1: Registro del paciente -->
+        <div class="section active" id="registration">
+            <h2>📋 Registro de Paciente</h2>
+            <form id="patientForm">
+                <div class="form-group">
+                    <label for="fullName">Nombre completo *</label>
+                    <input type="text" id="fullName" name="fullName" required>
+                    <div class="error-message">El nombre debe contener solo letras y espacios, entre 3 y 60 caracteres</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="documentType">Tipo de documento *</label>
+                    <select id="documentType" name="documentType" required>
+                        <option value="">Seleccione tipo de documento</option>
+                        <option value="CC">Cédula de Ciudadanía (CC)</option>
+                        <option value="TI">Tarjeta de Identidad (TI)</option>
+                        <option value="CE">Cédula de Extranjería (CE)</option>
+                    </select>
+                    <div class="error-message">Debe seleccionar un tipo de documento</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="documentNumber">Número de documento *</label>
+                    <input type="text" id="documentNumber" name="documentNumber" required>
+                    <div class="error-message">El número de documento debe contener 10 dígitos</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="room">Habitación *</label>
+                    <input type="text" id="room" name="room" required>
+                    <div class="error-message">Formato de habitación inválido (ej: 402A, H-203)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="service">Servicio *</label>
+                    <input type="text" id="service" name="service" required>
+                    <div class="error-message">El servicio debe contener solo letras y espacios, entre 3 y 30 caracteres</div>
+                </div>
+
+                <div class="button-group" style="justify-content: center;">
+                    <button type="submit" class="btn btn-primary">Registrar y Continuar</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sección 2: Deberes y derechos -->
+        <div class="section" id="rights">
+            <h2>📜 Deberes y Derechos del Paciente</h2>
+            
+            <!-- Botón para omitir sección -->
+            <div class="button-group-center">
+                <button type="button" class="btn btn-warning" id="skipRightsBtn">
+                    ⏭️ Omitir esta sección
+                </button>
+            </div>
+            
+            <div class="rights-counter">
+                <span id="rightsCounter">1 de 20</span>
+            </div>
+            <div class="rights-card" id="rightsCard">
+                <!-- Contenido dinámico -->
+            </div>
+            <div class="button-group">
+                <button type="button" class="btn btn-secondary" id="prevRight">Anterior</button>
+                <button type="button" class="btn btn-primary" id="nextRight">Siguiente</button>
+            </div>
+        </div>
+
+        <!-- Sección 3: Rutinas de ejercicios -->
+        <div class="section" id="exercises">
+            <h2>🧘‍♀️ Rutinas de Bienestar</h2>
+            
+            <!-- Aviso si se omitió la sección anterior -->
+            <div class="skip-notice" id="skipNotice" style="display: none;">
+                <h4>📋 Información importante</h4>
+                <p>Has omitido la sección de Derechos y Deberes. Te recomendamos revisarla más tarde para conocer tus derechos como paciente.</p>
+            </div>
+            
+            <div class="exercise-card">
+                <div class="exercise-illustration">🫁</div>
+                <h3>Respiración Profunda</h3>
+                <p>Ejercicio de relajación para reducir el estrés y mejorar la oxigenación.</p>
+                <div class="exercise-steps">
+                    <h4>Pasos a seguir:</h4>
+                    <ol>
+                        <li>Siéntate cómodamente en tu cama</li>
+                        <li>Coloca una mano en el pecho y otra en el abdomen</li>
+                        <li>Inhala lentamente por la nariz durante 4 segundos</li>
+                        <li>Mantén el aire por 2 segundos</li>
+                        <li>Exhala suavemente por la boca durante 6 segundos</li>
+                        <li>Repite 10 veces</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="exercise-card">
+                <div class="exercise-illustration">🤸‍♀️</div>
+                <h3>Movimientos Suaves</h3>
+                <p>Ejercicios ligeros para mantener la movilidad y circulación.</p>
+                <div class="exercise-steps">
+                    <h4>Pasos a seguir:</h4>
+                    <ol>
+                        <li>Rota suavemente los tobillos en círculos (10 veces cada uno)</li>
+                        <li>Flexiona y extiende los dedos de pies y manos</li>
+                        <li>Gira los hombros hacia adelante y atrás</li>
+                        <li>Inclina suavemente la cabeza de lado a lado</li>
+                        <li>Realiza cada movimiento lentamente</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="exercise-card">
+                <div class="exercise-illustration">🧠</div>
+                <h3>Relajación Mental</h3>
+                <p>Técnica de visualización para promover la calma y el bienestar.</p>
+                <div class="exercise-steps">
+                    <h4>Pasos a seguir:</h4>
+                    <ol>
+                        <li>Cierra los ojos suavemente</li>
+                        <li>Imagina un lugar tranquilo y seguro</li>
+                        <li>Respira profundamente y relaja cada músculo</li>
+                        <li>Mantén esta visualización por 5 minutos</li>
+                        <li>Abre los ojos lentamente cuando termines</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="btn btn-secondary" id="backToRights">Anterior</button>
+                <button type="button" class="btn btn-primary" id="goToSurvey">Continuar a Encuesta</button>
+            </div>
+        </div>
+
+        <!-- Sección 4: Encuesta de estado de ánimo -->
+        <div class="section" id="mood">
+            <h2>😊 ¿Cómo te sientes hoy?</h2>
+            <div class="mood-survey">
+                <p style="font-size: 1.2rem; margin-bottom: 2rem;">
+                    Selecciona la opción que mejor describa tu estado de ánimo actual:
+                </p>
+                
+                <div class="mood-options">
+                    <div class="mood-option" data-mood="muy-feliz">
+                        <div class="mood-emoji">😄</div>
+                        <div class="mood-label">Muy Feliz</div>
+                    </div>
+                    <div class="mood-option" data-mood="feliz">
+                        <div class="mood-emoji">😊</div>
+                        <div class="mood-label">Feliz</div>
+                    </div>
+                    <div class="mood-option" data-mood="neutral">
+                        <div class="mood-emoji">😐</div>
+                        <div class="mood-label">Neutral</div>
+                    </div>
+                    <div class="mood-option" data-mood="preocupado">
+                        <div class="mood-emoji">😟</div>
+                        <div class="mood-label">Preocupado</div>
+                    </div>
+                    <div class="mood-option" data-mood="triste">
+                        <div class="mood-emoji">😢</div>
+                        <div class="mood-label">Triste</div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" id="backToExercises">Anterior</button>
+                    <button type="button" class="btn btn-success" id="completeSurvey" disabled>Finalizar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensaje de finalización -->
+        <div class="completion-message" id="completionMessage" style="display: none;">
+            <h3>¡Gracias por completar tu registro de bienestar!</h3>
+            <p>Tu información ha sido registrada. El equipo médico estará al tanto de tu estado y necesidades.</p>
+            <p style="margin-top: 1rem;"><strong>¡Que tengas una pronta recuperación!</strong></p>
+            
+            <div style="margin-top: 2rem;">
+                <button type="button" class="btn btn-primary" id="newPatientBtn" onclick="resetApp()">
+                    🆕 Registrar Nuevo Paciente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
